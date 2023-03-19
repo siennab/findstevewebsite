@@ -112,6 +112,22 @@ function incrementRightCounter() {
         saveDataToJSON();
     }
 }
+	
+function saveDataToJSON() {
+	// Convert the data object to a JSON string
+	let jsonData = JSON.stringify(data);
+
+	// Send a PUT request to update the JSON file with the new data
+	fetch("data.json", {
+		method: "PUT",
+		body: jsonData,
+		headers: {
+			"Content-Type": "application/json"
+		}
+	})
+	.then(response => console.log(response))
+	.catch(error => console.error(error));
+}
 </script>
 </body>
 </html>
