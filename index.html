@@ -37,13 +37,14 @@ h1 {
 }
 
 .button {
-	background-color: blue;
+	background-color: #008aff;
 	color: white;
 	padding: 10px 20px;
 	border-radius: 5px;
 	cursor: pointer;
 	font-size: 18px;
 	margin-top: 10px;
+	border: none;
 }
 
 input[type="text"] {
@@ -176,7 +177,6 @@ function incrementLeftCounter() {
     count++;
     document.getElementById("leftCount").innerHTML = count;
 
-    // save data to JSON file
     updateData("left");
 }
 
@@ -186,10 +186,9 @@ function incrementRightCounter() {
         let count = parseInt(document.getElementById("rightCount").innerHTML);
         count++;
         document.getElementById("rightCount").innerHTML = count;
-        //document.getElementById("accessCodeValue").innerHTML = accessCode;
-
-        // save data to JSON file
         updateData("right");
+    } else {
+	alert("Please enter valid access code");    
     }
 }
 </script>
