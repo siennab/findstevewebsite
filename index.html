@@ -53,48 +53,111 @@
 	}
 
 </style>
-</head>
+
+<!-- The core Firebase JS SDK -->
+<script type="module" src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
+
+<!-- Add the Firebase products that you want to use -->
+<script type="module" src="https://www.gstatic.com/firebasejs/9.0.2/firebase-database.js"></script>
 <body>
 	<h1>Find Steve Behind the Bar</h1>
 	<div id="sidebar">
 		<div id="left">
 			<h2>Left Counter</h2>
 			<p>Count: <span id="leftCount">0</span></p>
-			<button class="button" onclick="incrementLeftCounter()">Increment</button>
+			<button class="button" id="leftCounter">Increment</button>
 		</div>
 		<div id="right">
 			<h2>Right Counter</h2>
 			<input type="text" placeholder="Enter access code" id="accessCode">
 			<p>Count: <span id="rightCount">0</span></p>
-			<button class="button" onclick="incrementRightCounter()">Increment</button>
+			<button class="button" id="rightCounter">Increment</button>
 		</div>
 	</div>
 
-<script>
-let data;
+<script type="module">
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+import { getFirestore, collection, query , getDocs, runTransaction, doc} from 'https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js'
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBm-tycIJommmsj1L79xQKykrIQjFyeElE",
+  authDomain: "findsteve-e4f84.firebaseapp.com",
+  projectId: "findsteve-e4f84",
+  storageBucket: "findsteve-e4f84.appspot.com",
+  messagingSenderId: "858094854465",
+  appId: "1:858094854465:web:bfc1f221c154b5364b01c0"
+};
 
-// Retrieve data from JSON file
-fetch("data.json")
-  .then((response) => { 
-     return response.json();
-   })
-  .then(json => {
-    data = json;
-    document.getElementById("leftCount").innerHTML = data.leftCount;
-    document.getElementById("rightCount").innerHTML = data.rightCount;
-  })
-  .catch(error => console.error(error));
+// Initialize Firebase
+let app = initializeApp(firebaseConfig);
+console.log(app);
+
+const db = getFirestore(app);
+
+let data;
+let docId;
+
+const q = query(collection(db, "count"));
+
+const querySnapshot = await getDocs(q);
+querySnapshot.forEach((doc) => {
+  // doc.data() is never undefined for query doc snapshots
+  console.log(doc.id, " => ", doc.data());
+  docId = doc.id;
+  document.getElementById("leftCount").innerHTML = doc.data().leftCount;
+  document.getElementById("rightCount").innerHTML = doc.data().rightCount;
+});
+
+async function updateData(side) {
+    // Create a reference to the SF doc.
+    const countDocRef = doc(db, "count", docId);
+
+
+    try {
+    await runTransaction(db, async (transaction) => {
+        const countDoc = await transaction.get(countDocRef);
+        if (!countDoc.exists()) {
+        throw "Document does not exist!";
+        }
+
+        if(side == 'left') {
+            const newPop = countDoc.data().leftCount + 1;
+            transaction.update(countDocRef, { leftCount: newPop });
+            return newPop;
+
+
+        } else {
+            const newPop = countDoc.data().rightCount + 1;
+            transaction.update(countDocRef, { rightCount: newPop });
+            return newPop;
+        }
+
+    });
+    } catch (e) {
+    // This will be a "population is too big" error.
+    console.error(e);
+    }
+
+}
+
+document.getElementById('leftCounter').addEventListener('click', () => {
+    incrementLeftCounter();
+});
+
+document.getElementById('rightCounter').addEventListener('click', () => {
+    incrementRightCounter();
+});
 
 function incrementLeftCounter() {
     let count = parseInt(document.getElementById("leftCount").innerHTML);
     count++;
     document.getElementById("leftCount").innerHTML = count;
 
-    // update data object
-    data.leftCount = count;
-
     // save data to JSON file
-    saveDataToJSON();
+    updateData("left");
 }
 
 function incrementRightCounter() {
@@ -103,32 +166,12 @@ function incrementRightCounter() {
         let count = parseInt(document.getElementById("rightCount").innerHTML);
         count++;
         document.getElementById("rightCount").innerHTML = count;
-        document.getElementById("accessCodeValue").innerHTML = accessCode;
-
-        // update data object
-        data.rightCount = count;
+        //document.getElementById("accessCodeValue").innerHTML = accessCode;
 
         // save data to JSON file
-        saveDataToJSON();
+        updateData("right");
     }
 }
-	
-function saveDataToJSON() {
-	// Convert the data object to a JSON string
-	let jsonData = JSON.stringify(data);
-
-	// Send a POST request to update the JSON file with the new data
-	fetch("data.json", {
-		method: "POST",
-		body: jsonData,
-		headers: {
-			"Content-Type": "application/json"
-		}
-	})
-	.then(response => console.log(response))
-	.catch(error => console.error(error));
-}
-
 </script>
 </body>
 </html>
