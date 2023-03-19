@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Find Steve Behind the Bar</title>
+	<style>
+    body {
+			background-color: yellow;
+    }
+    h1 {
+		text-align: center;
+		font-size: 36px;
+	}
+
+	#sidebar {
+		display: flex;
+		justify-content: space-between;
+		padding: 20px;
+	}
+
+	#left {
+		background-color: white;
+		width: 40%;
+		padding: 20px;
+		margin-right: 20px;
+		border-radius: 10px;
+	}
+
+	#right {
+		background-color: white;
+		width: 40%;
+		padding: 20px;
+		border-radius: 10px;
+	}
+
+	.button {
+		background-color: blue;
+		color: white;
+		padding: 10px 20px;
+		border-radius: 5px;
+		cursor: pointer;
+		font-size: 18px;
+		margin-top: 10px;
+	}
+
+	input[type="text"] {
+		padding: 10px;
+		font-size: 18px;
+		border-radius: 5px;
+		border: 1px solid gray;
+		margin-bottom: 10px;
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+</style>
+</head>
+<body>
+	<h1>Find Steve Behind the Bar</h1>
+	<div id="sidebar">
+		<div id="left">
+			<h2>Left Counter</h2>
+			<p>Count: <span id="leftCount">0</span></p>
+			<button class="button" onclick="incrementLeftCounter()">Increment</button>
+		</div>
+		<div id="right">
+			<h2>Right Counter</h2>
+			<input type="text" placeholder="Enter access code" id="accessCode">
+			<p>Count: <span id="rightCount">0</span></p>
+			<button class="button" onclick="incrementRightCounter()">Increment</button>
+		</div>
+	</div>
+
+<script>
+let data;
+
+// Retrieve data from JSON file
+fetch("data.json")
+  .then(response => response.json())
+  .then(json => {
+    data = json;
+    document.getElementById("leftCount").innerHTML = data.leftCount;
+    document.getElementById("rightCount").innerHTML = data.rightCount;
+  })
+  .catch(error => console.error(error));
+
+function incrementLeftCounter() {
+    let count = parseInt(document.getElementById("leftCount").innerHTML);
+    count++;
+    document.getElementById("leftCount").innerHTML = count;
+
+    // update data object
+    data.leftCount = count;
+
+    // save data to JSON file
+    saveDataToJSON();
+}
+
+function incrementRightCounter() {
+    let accessCode = document.getElementById("accessCode").value;
+    if(accessCode == "1234") {
+        let count = parseInt(document.getElementById("rightCount").innerHTML);
+        count++;
+        document.getElementById("rightCount").innerHTML = count;
+        document.getElementById("accessCodeValue").innerHTML = accessCode;
+
+        // update data object
+        data.rightCount = count;
+
+        // save data to JSON file
+        saveDataToJSON();
+    }
+}
+</script>
+</body>
+</html>
